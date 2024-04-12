@@ -1,0 +1,7 @@
+[flake8]
+extend-ignore = E203
+exclude =
+    ./main/settings*.py,
+    *migrations*,
+    .env
+max-complexity = 10
