@@ -74,7 +74,7 @@ def login_google_user(provider, user_id, email, name):
                 detail='Please continue your login using ' + filtered_user_by_email[0].auth_provider)
 
     else:
-        raise AuthenticationFailed(detail="Email Not Found... Kindly Proceed To Signup.")
+        raise AuthenticationFailed(detail="User Not Found... Kindly Proceed To Signup.")
 
 class GoogleSignupSocialAuthSerializer(serializers.Serializer):
     auth_token = serializers.CharField()

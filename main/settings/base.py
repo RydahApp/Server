@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'apps.socialAuths',
 ]
 
+AUTH_USER_MODEL = 'registration.User'
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
