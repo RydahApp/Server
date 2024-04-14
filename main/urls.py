@@ -36,7 +36,7 @@ admin.site.site_header = f"Welcome To Rydah E-commerce Backend Admin Panel"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("apps.registration.urls")),
-    path("soicalAuth/", include("apps.socialAuths.urls")),
+    path("soicalauth/", include("apps.socialAuths.urls")),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/api.json/', schema_view.without_ui(cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
