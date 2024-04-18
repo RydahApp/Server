@@ -2,29 +2,27 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.utils import timezone
 
 
+
 class CustomManager(BaseUserManager):
-  def create_user(self, first_name, last_name, username, email, password, date_of_birth, is_admin=False, is_active=True):
-    now = timezone.now()
-    user = self.model(
-      first_name, 
-      last_name, 
-      username,
-      email = self.normalize_email(email),
-      date_of_birth=date_of_birth,
-      last_login=now,
-      date_joined=now,
-    )
-    user.is_admin=False
-    user.is_active=True
-    user.set_password(password)
-    user.save(using=self._db)
-  
-  def create_superuser(self, email, password):
-    user = self.create_user(
-      email=email,
-      password=password
-    )
-    user.is_admin=True
-    user.is_active=True
-    user.save(using=self._db)
-  
+  def create_user(self, username, email, password=None):
+        if not username:
+            raise ValueError('Users should have a username')
+        if not email:
+          raise ValueError("The Email must be set")
+        if not password:
+         raise ValueError("The Password must be set")
+
+        user = self.model(username=username, email=self.normalize_email(email))
+        user.set_password(password)
+        user.save()
+        return user
+
+  def create_superuser(self, username, email, password=None):
+      if password is None:
+          raise TypeError('Password should not be none')
+
+      user = self.create_user(username, email, password)
+      user.is_superuser = True
+      user.is_admin = True
+      user.save()
+      return user

@@ -17,7 +17,7 @@ class User(AbstractBaseUser):
   created =  models.DateTimeField(auto_now=True)
   
   REQUIRED_FIELDS = ['username']
-  USERNAME_FIELD = "email"
+  USERNAME_FIELD = 'email'
   
   objects = CustomManager()
   
