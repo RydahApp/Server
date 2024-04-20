@@ -1,10 +1,7 @@
-from rest_framework import generics
+from rest_framework import generics, status, permissions
 from .models import User
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect
-from django.contrib import messages
 from rest_framework.response import Response
 from django.views.generic import View
 # Create your views here.
@@ -17,26 +14,20 @@ class RegisterView(generics.CreateAPIView):
   serializer_class = RegisterSerializer
   permission_classes = [AllowAny]
 
-class LoginView(generics.GenericAPIView):
-  serializer_class = LoginSerializer
-  permission_classes = [AllowAny]
-  
-  def post(self, request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-    user = authenticate(request, username=username, password=password)
-      
-    if user is not None:
-      login(request, user)
-      print("YAYYY")
-      return redirect('apps.registration:home')
-    else:
-      print("Error")
-      return Response(messages.error(request, "Error"))
+class LoginAPIView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
 
-class LogOutView(generics.GenericAPIView):
-  def get(self, request):
-    username = request.data.get('username')
-    logout(request)
-    print(f"You are logged OUT {username}")
-    return redirect('apps.registration:login')
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class LogoutAPIView(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

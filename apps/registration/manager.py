@@ -7,7 +7,7 @@ class CustomManager(BaseUserManager):
   def create_user(self, username, email, password=None):
 
         if not username:
-            raise ValueError('Users should have a username')
+          raise ValueError('Users should have a username')
         if not email:
           raise ValueError("The Email must be set")
         if not password:
