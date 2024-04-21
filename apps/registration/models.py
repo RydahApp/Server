@@ -7,7 +7,7 @@ AUTH_PROVIDERS = {'apple': 'apple', 'google': 'google', 'email': 'email'}
 
 class User(AbstractBaseUser, PermissionsMixin):
   email = models.EmailField(unique=True, max_length=100)
-  username = models.CharField(unique=True, max_length=50)
+  username = None
   last_login = models.DateTimeField(null=True, blank=True)
   date_joined = models.DateTimeField(auto_now_add=True)
   auth_provider = models.CharField(max_length=255, blank=False, null=False, default=AUTH_PROVIDERS.get('email'))
@@ -17,7 +17,7 @@ class User(AbstractBaseUser, PermissionsMixin):
   is_admin = models.BooleanField(default=False)
   created =  models.DateTimeField(auto_now=True)
   
-  REQUIRED_FIELDS = ['username']
+  REQUIRED_FIELDS = []
   USERNAME_FIELD = 'email'
   
   objects = CustomManager()

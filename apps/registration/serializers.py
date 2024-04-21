@@ -32,36 +32,20 @@ class RegisterSerializer(serializers.ModelSerializer):
     user.set_password(validated_data['password'])
     user.save()
     return user
-  
-  
-
-
-# class LoginSerializer(serializers.ModelSerializer):
-#   password = serializers.CharField(
-#         style={'input_type': 'password'}
-#     )
-#   class Meta:
-#     model = User
-#     fields = ['username', 'password']
-#     extra_kwargs = {'password': {'write_only': True}}
-  
-#   def validate(self, attrs):
-#       username = attrs.get('username')
-#       password = attrs.get('password')
       
-#       if username and password:
-#           user = authenticate(request=self.context.get('request'),
-#                               username=username, password=password)
-#           if not user:
-#               msg = 'Unable to log in with provided credentials.'
-#               raise serializers.ValidationError(msg, code='authorization')
-#       else:
-#           msg = 'Must include "username" and "password".'
-#           raise serializers.ValidationError(msg, code='authorization')
-#       attrs['user'] = user
-#       print(attrs)
-#       return attrs
-      
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+    default_error_message = {'bad_token': ('Token is expired or invalid')}
+
+    def validate(self, attrs):
+        self.token = attrs['refresh']
+        return attrs
+
+    def save(self, **kwargs):
+        try:
+            RefreshToken(self.token).blacklist()
+        except TokenError:
+            self.fail('bad_token')
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, min_length=3)
@@ -105,16 +89,3 @@ class LoginSerializer(serializers.ModelSerializer):
 
         return super().validate(attrs)
     
-class LogoutSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
-    default_error_message = {'bad_token': ('Token is expired or invalid')}
-
-    def validate(self, attrs):
-        self.token = attrs['refresh']
-        return attrs
-
-    def save(self, **kwargs):
-        try:
-            RefreshToken(self.token).blacklist()
-        except TokenError:
-            self.fail('bad_token')
