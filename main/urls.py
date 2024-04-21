@@ -19,6 +19,8 @@ from django.urls import path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from rest_framework_simplejwt.views import TokenRefreshView
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Rydah E-commerce Backend APIs",
@@ -28,14 +30,16 @@ schema_view = get_schema_view(
         contact=openapi.Contact(email="admin@rydah.com"),
         license=openapi.License(name="License"),
     ),
-    public=False,
+    public=True,
     permission_classes=(permissions.AllowAny,),
 )
 admin.site.site_title = f"Rydah E-commerce Backend"
 admin.site.site_header = f"Welcome To Rydah E-commerce Backend Admin Panel"
 urlpatterns = [
+    path('api-auth/', include('rest_framework.urls')),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('admin/', admin.site.urls),
-    path("", include("apps.registration.urls")),
+    path("auth/", include("apps.registration.urls")),
     path("soicalauth/", include("apps.socialAuths.urls")),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/api.json/', schema_view.without_ui(cache_timeout=0), name='schema-swagger-ui'),
