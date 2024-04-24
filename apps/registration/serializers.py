@@ -89,3 +89,9 @@ class LoginSerializer(serializers.ModelSerializer):
 
         return super().validate(attrs)
     
+class EmailVerificationSerializer(serializers.ModelSerializer):
+    otp = serializers.IntegerField()
+
+    class Meta:
+        model = User
+        fields = ['otp']
