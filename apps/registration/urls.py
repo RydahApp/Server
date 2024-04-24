@@ -10,5 +10,6 @@ urlpatterns = [
     path('login/', LoginAPIView.as_view(), name="login"),
     path('logout/', LogoutAPIView.as_view(), name="logout"),
     path('email-otp-verify/', VerifyEmail.as_view(), name="email-verify"),
+    path('email-resend-otp-verify/', ResendOTP.as_view(), name="email-verify"),
 
 ]
