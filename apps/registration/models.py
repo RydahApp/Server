@@ -19,6 +19,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
   otp = models.IntegerField(null=True,blank=True)
   activation_key = models.CharField(max_length=150,blank=True,null=True)
+  user_secret_key = models.CharField(max_length=500,null=True,blank=True)
   
   REQUIRED_FIELDS = []
   USERNAME_FIELD = 'email'

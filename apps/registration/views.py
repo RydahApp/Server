@@ -42,7 +42,7 @@ class RegisterView(generics.GenericAPIView):
             sg = SendGridAPIClient(api_key=os.environ.get('SENDGRID_KEY'))
             message = Mail(
             from_email='rydah2024@gmail.com',  # Sender's email address
-            to_emails=f"lasisihabeeb67@gmail.com",  # Recipient's email address
+            to_emails=user.email,  # Recipient's email address
             subject="Email Verification Code",
             html_content=f"<p>Dear User, Welcome to Rydah E-commerce</p><p>Kindly use the code below to verify your account.</p><p><h2>{user_otp['OTP']}</h2> </p><p>Best regards</p>") # Email content (HTML supported)
 
@@ -62,7 +62,7 @@ class RegisterView(generics.GenericAPIView):
 
 
 class VerifyEmail(views.APIView):
-    serializer_class = EmailVerificationSerializer
+    serializer_class = EmailOTPVerificationSerializer
     otp_param_config = openapi.Parameter('otp', in_=openapi.IN_QUERY, description='Description', type=openapi.TYPE_STRING)
 
     @swagger_auto_schema(manual_parameters=[otp_param_config])
@@ -73,13 +73,65 @@ class VerifyEmail(views.APIView):
             verify = verify_otp(user.activation_key,otp)
             if verify:
                 user.is_verified = True
+                user.user_secret_key = generateKey()['totp']
+                user.otp = None
                 user.save()
-                return Response({'email': 'Verification Successful'}, status=status.HTTP_200_OK)
+                sg = SendGridAPIClient(api_key=os.environ.get('SENDGRID_KEY'))
+                message = Mail(
+                from_email='rydah2024@gmail.com',  # Sender's email address
+                to_emails=user.email,  # Recipient's email address
+                subject="Email Verification Successful!",
+                html_content=f"<p>Dear User, Welcome to Rydah E-commerce</p><p>Email verified successfully.</p><p> </p><p>Best regards</p>") # Email content (HTML supported)
+
+                try:
+                    # Send the email
+                    response = sg.send(message)
+                    print("Email sent successfully!")
+                    print(response.status_code)
+                    print(response.body)
+                    print(response.headers)
+                except Exception as e:
+                    print("Error sending email.")
+                    print(e)
+                return Response({'message': 'Email Verification Successful'}, status=status.HTTP_200_OK)
             else:
-                return Response({"Time out" : "Given otp is expired!!"}, status=status.HTTP_408_REQUEST_TIMEOUT)
+                return Response({"message" : "Time Out, Given OTP is expired!!"}, status=status.HTTP_408_REQUEST_TIMEOUT)
         except:
-            return Response({"No User" : "Invalid otp OR No any inactive user found for given otp"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message" : "Invalid OTP OR No any inactive user found for given otp"}, status=status.HTTP_400_BAD_REQUEST)
        
+class ResendOTP(views.APIView):
+    serializer_class = EmailResendOTPVerificationSerializer
+    email_param_config = openapi.Parameter('email', in_=openapi.IN_QUERY, description='Description', type=openapi.TYPE_STRING)
+
+    @swagger_auto_schema(manual_parameters=[email_param_config])
+    def get(self, request):
+        email = request.data["email"]
+        try:
+            user = User.objects.get(email = email)
+            key = generateKey()
+            user.otp = key['OTP']
+            user.activation_key = key['totp']
+            user.save(update_fields=['otp','activation_key'])
+            sg = SendGridAPIClient(api_key=os.environ.get('SENDGRID_KEY'))
+            message = Mail(
+            from_email='rydah2024@gmail.com',  # Sender's email address
+            to_emails=user.email,  # Recipient's email address
+            subject="Email Verification Code Resent!",
+            html_content=f"<p>Dear User, Welcome to Rydah E-commerce</p><p>Kindly use the code below to verify your account.</p><p><h2>{key['OTP']}</h2> </p><p>Best regards</p>") # Email content (HTML supported)
+
+            try:
+                # Send the email
+                response = sg.send(message)
+                print("Email sent successfully!")
+                print(response.status_code)
+                print(response.body)
+                print(response.headers)
+            except Exception as e:
+                print("Error sending email.")
+                print(e)        
+            return Response({"message" : "OTP successfully sent!"},status=status.HTTP_200_OK)
+        except:
+            return Response({"message" : "No Inactive account found for this given email!!"}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginAPIView(generics.GenericAPIView):
     serializer_class = LoginSerializer
