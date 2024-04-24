@@ -16,6 +16,10 @@ class User(AbstractBaseUser, PermissionsMixin):
   is_active = models.BooleanField(default=True)
   is_admin = models.BooleanField(default=False)
   created =  models.DateTimeField(auto_now=True)
+
+  otp = models.IntegerField(null=True,blank=True)
+  activation_key = models.CharField(max_length=150,blank=True,null=True)
+  user_secret_key = models.CharField(max_length=500,null=True,blank=True)
   
   REQUIRED_FIELDS = []
   USERNAME_FIELD = 'email'
