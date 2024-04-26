@@ -3,7 +3,7 @@ from .models import User
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import auth
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .otp import *
 from .utils import *
@@ -130,5 +130,22 @@ class SetNewPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=6, max_length=68, write_only=True)
     email = serializers.EmailField(min_length=2)
     class Meta:
-        fields = ['password']
+        model = User
+        fields = ['password', 'email']
+
+    def validate(self, attrs):
+        try:
+            password = attrs.get('password')
+            email = attrs.get('email')
+            if User.objects.filter(email=email).exists:
+                user = User.objects.get(email=email)
+                user.set_password(password)
+                user.save()
+                PasswordResetSuccessEmail(email)
+                return user
+            else:
+                raise ValidationError("Email Not Found!!!")
+        except Exception as e:
+            raise AuthenticationFailed('Something went wrong!!!', 401)
+        return super().validate(attrs)
 

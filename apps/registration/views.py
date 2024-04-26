@@ -91,20 +91,27 @@ class RequestResetPasswordView(generics.GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
+# class SetResetPasswordAPIView(generics.GenericAPIView):
+#     serializer_class = SetNewPasswordSerializer
+#     permission_classes = [AllowAny]
+#     def post(self, request):
+#         serializer = self.serializer_class(data=request.data)
+#         if serializer.is_valid():
+#             email = serializer.data['email']
+#             password = serializer.data['password']
+#             if User.objects.filter(email=email).exists():
+#                 user = User.objects.get(email=email)
+#                 user.set_password(password)
+#                 user.save()
+#                 PasswordResetSuccessEmail(email)
+#                 return Response({'message': "Password reset successful", 'data': serializer.data, 'status': 'success'}, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({'message': "Email Not Found!", 'status': 'failed'}, status=status.HTTP_401_UNAUTHORIZED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class SetResetPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer
-    permission_classes = [AllowAny]
-    def post(self, request):
+    def patch(self, request):
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            email = serializer.data['email']
-            password = serializer.data['password']
-            if User.objects.filter(email=email).exists():
-                user = User.objects.get(email=email)
-                user.set_password(password)
-                user.save()
-                PasswordResetSuccessEmail(email)
-                return Response({'message': "Password reset successful", 'data': serializer.data, 'status': 'success'}, status=status.HTTP_200_OK)
-            else:
-                return Response({'message': "Email Not Found!", 'status': 'failed'}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
