@@ -3,11 +3,7 @@ from .models import User
 from .serializers import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 from .otp import generateKey, verify_otp
-from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .utils import *
