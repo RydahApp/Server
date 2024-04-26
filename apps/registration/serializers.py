@@ -1,17 +1,15 @@
 from rest_framework import serializers
 from .models import User
-from django.contrib.auth import authenticate, get_user_model
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import auth
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-
+from .otp import *
+from .utils import *
 
 class RegisterSerializer(serializers.ModelSerializer):
-  password = serializers.CharField(
-        style={'input_type': 'password'}, write_only=True
-    )
+  password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
   class Meta:
     model = User
     fields = ['email', 'password']
@@ -25,12 +23,14 @@ class RegisterSerializer(serializers.ModelSerializer):
           return date_of_birth
       
   def create(self, validated_data):
-    user = User.objects.create(
-      # username = validated_data['username'],
-      email = validated_data['email'],
-    )
+    user = User.objects.create(email = validated_data['email'])
     user.set_password(validated_data['password'])
+    user_otp = generateKey()
+    user = User.objects.get(email=validated_data['email'])
+    user.otp = user_otp['OTP']
+    user.activation_key = user_otp['totp']
     user.save()
+    RegisterEmailMessage(user.email)
     return user
       
 class LogoutSerializer(serializers.Serializer):
@@ -89,6 +89,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
         return super().validate(attrs)
     
+
 class EmailOTPVerificationSerializer(serializers.ModelSerializer):
     otp = serializers.IntegerField()
 
