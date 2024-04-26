@@ -107,18 +107,21 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
     class Meta:
         fields = ['email']
 
-    def create(self, validated_data):
+    def validate(self, attrs):
         try:
-            email = validated_data['email']
-            user = User.objects.get(email=email)
-            user_otp = generateKey()
-            user.otp = user_otp['OTP']
-            user.activation_key = user_otp['totp']
-            user.save()
-            ResetPasswordEmailMessage(user.email, user_otp['OTP'])
-            return user
+            email = attrs.get('email')
+            if User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
+                user_otp = generateKey()
+                user.otp = user_otp['OTP']
+                user.activation_key = user_otp['totp']
+                user.save()
+                ResetPasswordEmailMessage(user.email, user_otp['OTP'])
+                return user
+            else:
+                raise ValidationError("User with email not found...", 401)
         except Exception as e:
-            raise AuthenticationFailed('Email Not Found', 401)
+            raise AuthenticationFailed('Invalid Email', 401)
 
 class ResetPasswordEmailOTPVerificationSerializer(serializers.ModelSerializer):
     otp = serializers.IntegerField()
