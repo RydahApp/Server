@@ -30,7 +30,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     user.otp = user_otp['OTP']
     user.activation_key = user_otp['totp']
     user.save()
-    RegisterEmailMessage(user.email)
+    RegisterEmailMessage(user.email, user_otp['OTP'])
     return user
       
 class LogoutSerializer(serializers.Serializer):
@@ -89,10 +89,8 @@ class LoginSerializer(serializers.ModelSerializer):
 
         return super().validate(attrs)
     
-
 class EmailOTPVerificationSerializer(serializers.ModelSerializer):
     otp = serializers.IntegerField()
-
     class Meta:
         model = User
         fields = ['otp']
@@ -103,3 +101,34 @@ class EmailResendOTPVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email']
+
+class ResetPasswordEmailRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+    class Meta:
+        fields = ['email']
+
+    def create(self, validated_data):
+        try:
+            email = validated_data['email']
+            user = User.objects.get(email=email)
+            user_otp = generateKey()
+            user.otp = user_otp['OTP']
+            user.activation_key = user_otp['totp']
+            user.save()
+            ResetPasswordEmailMessage(user.email, user_otp['OTP'])
+            return user
+        except Exception as e:
+            raise AuthenticationFailed('Email Not Found', 401)
+
+class ResetPasswordEmailOTPVerificationSerializer(serializers.ModelSerializer):
+    otp = serializers.IntegerField()
+    class Meta:
+        model = User
+        fields = ['otp']
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=6, max_length=68, write_only=True)
+    email = serializers.EmailField(min_length=2)
+    class Meta:
+        fields = ['password']
+

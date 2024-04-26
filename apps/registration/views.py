@@ -38,7 +38,7 @@ class VerifyEmail(views.APIView):
                 user.otp = None
                 user.save()
                 VerifyEmailMessage(user.email)
-                return Response({'message': 'Email Verification Successful'}, status=status.HTTP_200_OK)
+                return Response({'message': 'Verification Successful', 'email': user.email, 'status': 'success'}, status=status.HTTP_200_OK)
             else:
                 return Response({"message" : "Time Out, Given OTP is expired!!"}, status=status.HTTP_408_REQUEST_TIMEOUT)
         except:
@@ -56,7 +56,7 @@ class ResendOTP(views.APIView):
             user.otp = key['OTP']
             user.activation_key = key['totp']
             user.save(update_fields=['otp','activation_key'])   
-            ResendOTPEmailMessage(user.email)    
+            ResendOTPEmailMessage(user.email, key['OTP'])    
             return Response({"message" : "OTP successfully sent!"},status=status.HTTP_200_OK)
         except:
             return Response({"message" : "No Inactive account found for this given email!!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -78,3 +78,33 @@ class LogoutAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class RequestResetPasswordView(generics.GenericAPIView):
+    serializer_class = ResetPasswordEmailRequestSerializer
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = ResetPasswordEmailRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.create(validated_data=request.data)
+            return Response({'message': "OTP Sent", "status": "success"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class SetResetPasswordAPIView(generics.GenericAPIView):
+    serializer_class = SetNewPasswordSerializer
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            email = serializer.data['email']
+            password = serializer.data['password']
+            if User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
+                user.set_password(password)
+                user.save()
+                PasswordResetSuccessEmail(email)
+                return Response({'message': "Password reset successful", 'data': serializer.data, 'status': 'success'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': "Email Not Found!", 'status': 'failed'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
