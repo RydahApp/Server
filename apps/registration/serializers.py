@@ -1,17 +1,15 @@
 from rest_framework import serializers
 from .models import User
-from django.contrib.auth import authenticate, get_user_model
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import auth
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-
+from .otp import *
+from .utils import *
 
 class RegisterSerializer(serializers.ModelSerializer):
-  password = serializers.CharField(
-        style={'input_type': 'password'}, write_only=True
-    )
+  password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
   class Meta:
     model = User
     fields = ['email', 'password']
@@ -25,12 +23,14 @@ class RegisterSerializer(serializers.ModelSerializer):
           return date_of_birth
       
   def create(self, validated_data):
-    user = User.objects.create(
-      # username = validated_data['username'],
-      email = validated_data['email'],
-    )
+    user = User.objects.create(email = validated_data['email'])
     user.set_password(validated_data['password'])
+    user_otp = generateKey()
+    user = User.objects.get(email=validated_data['email'])
+    user.otp = user_otp['OTP']
+    user.activation_key = user_otp['totp']
     user.save()
+    RegisterEmailMessage(user.email, user_otp['OTP'])
     return user
       
 class LogoutSerializer(serializers.Serializer):
@@ -91,7 +91,6 @@ class LoginSerializer(serializers.ModelSerializer):
     
 class EmailOTPVerificationSerializer(serializers.ModelSerializer):
     otp = serializers.IntegerField()
-
     class Meta:
         model = User
         fields = ['otp']
@@ -102,3 +101,54 @@ class EmailResendOTPVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email']
+
+class ResetPasswordEmailRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+    class Meta:
+        fields = ['email']
+
+    def validate(self, attrs):
+        try:
+            email = attrs.get('email')
+            if User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
+                user_otp = generateKey()
+                user.otp = user_otp['OTP']
+                user.activation_key = user_otp['totp']
+                user.save()
+                ResetPasswordEmailMessage(user.email, user_otp['OTP'])
+                return user
+            else:
+                raise ValidationError("User with email not found...", 401)
+        except Exception as e:
+            raise AuthenticationFailed('Invalid Email', 401)
+
+class ResetPasswordEmailOTPVerificationSerializer(serializers.ModelSerializer):
+    otp = serializers.IntegerField()
+    class Meta:
+        model = User
+        fields = ['otp']
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(min_length=6, max_length=68, write_only=True)
+    email = serializers.EmailField(min_length=2)
+    class Meta:
+        model = User
+        fields = ['password', 'email']
+
+    def validate(self, attrs):
+        try:
+            password = attrs.get('password')
+            email = attrs.get('email')
+            if User.objects.filter(email=email).exists:
+                user = User.objects.get(email=email)
+                user.set_password(password)
+                user.save()
+                PasswordResetSuccessEmail(email)
+                return user
+            else:
+                raise ValidationError("Email Not Found!!!")
+        except Exception as e:
+            raise AuthenticationFailed('Something went wrong!!!', 401)
+        return super().validate(attrs)
+
