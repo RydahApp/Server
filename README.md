@@ -34,6 +34,7 @@ To access the source code and documentation, follow these steps:
     export DB_PASSWORD=<your-database-password>
     export DB_HOST=<your-database-host>
     export DB_PORT=<your-database-port>
+    export SENDGRID_KEY=<your-sendgrid-key>
 
       
     > **__NOTE__**: You can generate and copy a secret key(`SECRET_KEY`) for the django app by opening a django shell `python manage.py shell` and running;
@@ -46,6 +47,9 @@ To access the source code and documentation, follow these steps:
 - Set up the database:
     - Ensure you have PostgreSQL installed and running.
     - Create a database and user according to the value in your `.env`'s file.
+- Run makemigrations:
+    ```bash
+    python manage.py makemigrations
 - Run migrations:
     ```bash
     python manage.py migrate
@@ -53,3 +57,20 @@ To access the source code and documentation, follow these steps:
     ```bash
     python manage.py runserver
     ```
+
+## Resolving Database Conflict / Migration to Database
+
+- Delete Postgres Database from pgAdmin
+- Create a new Database with pdAdmin
+- Delete all Migration folders
+- Run makemigrations:
+    ```bash
+    python manage.py makemigrations <app_name with users models goes first>
+- Run migrations:
+    ```bash
+    python manage.py migrate
+- Run development server:
+    ```bash
+    python manage.py runserver
+    ```
+

@@ -68,27 +68,27 @@ class RegisterTestCase(APITestCase):
     }
   
   def test_user_can_register(self):
-    response = self.client.post(reverse('apps.registration:register'), self.user1)
+    response = self.client.post(reverse('apps.auths:register'), self.user1)
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
   
   def test_empty_creditial(self):
-    response = self.client.post(reverse('apps.registration:register'), self.user2)
+    response = self.client.post(reverse('apps.auths:register'), self.user2)
     self.assertEqual(response.status_code, 400)
   
   def admin_got_access_to_login(self):
-    response = self.client.post(reverse('apps.registration:login'), self.admin)
+    response = self.client.post(reverse('apps.auths:login'), self.admin)
     self.client.force_login(self.admin)
     self.assertEqual(response.status_code, 200)
   
   def test_user_is_under_18(self):
-    response = self.client.post(reverse('apps.registration:register'), self.under_age_user)
+    response = self.client.post(reverse('apps.auths:register'), self.under_age_user)
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     self.assertEqual(response.data['date_of_birth'], ['Must be at least 18 years old to register.'])
   
   def test_existing_user(self):
     existing_user = User.objects.create_user(email='existing@example.com', username='existing', password='test123')
     self.same_as_existing_user = {'email': 'existing@example.com', 'username':'existing', 'password': 'test123', 'first_name': 'Existing', 'last_name': 'User'}    
-    response = self.client.post(reverse('apps.registration:register'), self.same_as_existing_user)
+    response = self.client.post(reverse('apps.auths:register'), self.same_as_existing_user)
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -100,12 +100,12 @@ class LoginTestCase(APITestCase):
 
     def test_user_can_login(self):
       self.registered_user = {'username': 'test', 'email':'test1gmail.com', 'password':'test123'}
-      response = self.client.post(reverse('apps.registration:login'), self.registered_user)
+      response = self.client.post(reverse('apps.auths:login'), self.registered_user)
       self.assertEqual(response.status_code, 302)
 
     def test_wrong_creditials(self):
       self.unregistered_user = {'username': 'G', 'email':'g@gmail.com', 'password':'g'}
-      response = self.client.post(reverse('apps.registration:login'), self.unregistered_user)
+      response = self.client.post(reverse('apps.auths:login'), self.unregistered_user)
       self.assertEqual(response.status_code, 200)
 
 #admin can login

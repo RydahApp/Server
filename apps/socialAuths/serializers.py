@@ -1,7 +1,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from apps.registration.models import User
+from apps.auths.models import User
 import random
 from rest_framework.exceptions import AuthenticationFailed
 from google.auth.transport import requests
