@@ -49,7 +49,7 @@ class ResendOTP(views.APIView):
     email_param_config = openapi.Parameter('email', in_=openapi.IN_QUERY, description='Description', type=openapi.TYPE_STRING)
     @swagger_auto_schema(manual_parameters=[email_param_config])
     def get(self, request):
-        email = request.data["email"]
+        email = request.GET.get("email")
         try:
             user = User.objects.get(email = email)
             key = generateKey()
@@ -57,7 +57,7 @@ class ResendOTP(views.APIView):
             user.activation_key = key['totp']
             user.save(update_fields=['otp','activation_key'])   
             ResendOTPEmailMessage(user.email, key['OTP'])    
-            return Response({"message" : "OTP successfully sent!"},status=status.HTTP_200_OK)
+            return Response({"message" : "OTP successfully resent!"},status=status.HTTP_200_OK)
         except:
             return Response({"message" : "No Inactive account found for this given email!!"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -93,3 +93,14 @@ class SetResetPasswordAPIView(generics.GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
+
+class UserProfileAPIView(generics.GenericAPIView):
+    serializer_class = UserProfileSerializer
+    queryset = UserProfile.objects.all()
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = UserProfileSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=self.request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

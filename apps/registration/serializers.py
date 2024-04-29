@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import *
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import auth
@@ -7,6 +7,8 @@ from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .otp import *
 from .utils import *
+from django.contrib.auth.hashers import make_password
+
 
 class RegisterSerializer(serializers.ModelSerializer):
   password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
@@ -24,7 +26,8 @@ class RegisterSerializer(serializers.ModelSerializer):
       
   def create(self, validated_data):
     user = User.objects.create(email = validated_data['email'])
-    user.set_password(validated_data['password'])
+    user.password = make_password(validated_data['password'])
+    user.save()
     user_otp = generateKey()
     user = User.objects.get(email=validated_data['email'])
     user.otp = user_otp['OTP']
@@ -142,7 +145,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
             email = attrs.get('email')
             if User.objects.filter(email=email).exists:
                 user = User.objects.get(email=email)
-                user.set_password(password)
+                user.password = make_password(password)
                 user.save()
                 PasswordResetSuccessEmail(email)
                 return user
@@ -151,4 +154,26 @@ class SetNewPasswordSerializer(serializers.Serializer):
         except Exception as e:
             raise AuthenticationFailed('Something went wrong!!!', 401)
         return super().validate(attrs)
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        exclude = ['user', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        print(username)
+        email = attrs.get('email')
+
+        if User.objects.filter(username=username).exists():
+            raise AuthenticationFailed('The username already exists', 401)
+        else:
+            if User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
+                user.username = username
+                user.save()
+                return super().validate(attrs)
+            else:
+                raise ValidationError('Email Provided Does Not Match Signup Mail', 401)
+        
 

@@ -14,5 +14,5 @@ urlpatterns = [
     path('reset-password-request/', RequestResetPasswordView.as_view(), name="reset-request-pass"),
     path('reset-verify-otp/', VerifyEmail.as_view(), name="reset-verify-pass"),
     path('reset-set-new-password/', SetResetPasswordAPIView.as_view(), name="reset-set-new-pass"),
-
+    path('create-userprofile/', UserProfileAPIView.as_view(), name="userprofile"),
 ]
