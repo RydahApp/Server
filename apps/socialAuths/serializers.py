@@ -43,10 +43,11 @@ def register_google_user(provider, user_id, email, name):
         raise AuthenticationFailed(detail="User already registered... Proceed to login.")
     else:
         user = {
-            'username': generate_username(name), 'email': email,
+            'email': email,
             'password': os.environ.get('SOCIAL_SECRET')
             }
         user = User.objects.create_user(**user)
+        user.username = generate_username(name)
         user.is_verified = True
         user.auth_provider = provider
         user.save()
@@ -87,7 +88,7 @@ class GoogleSignupSocialAuthSerializer(serializers.Serializer):
         
         # if user_data['aud'] != os.environ.get('GOOGLE_CLIENT_ID'):
         #     raise AuthenticationFailed('Not Authorizied...')
-
+        print(user_data)
         user_id = user_data['sub']
         email = user_data['email']
         name = user_data['name']
