@@ -20,7 +20,7 @@ class RegisterView(generics.GenericAPIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.create(validated_data=request.data)
-            return Response({'message': "Registration Successful"}, status=status.HTTP_201_CREATED)
+            return Response({'message': "auths Successful"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyEmail(views.APIView):
