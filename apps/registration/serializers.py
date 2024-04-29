@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import *
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.contrib import auth
@@ -7,6 +7,8 @@ from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .otp import *
 from .utils import *
+from django.contrib.auth.hashers import make_password
+
 
 class RegisterSerializer(serializers.ModelSerializer):
   password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
@@ -24,7 +26,8 @@ class RegisterSerializer(serializers.ModelSerializer):
       
   def create(self, validated_data):
     user = User.objects.create(email = validated_data['email'])
-    user.set_password(validated_data['password'])
+    user.password = make_password(validated_data['password'])
+    user.save()
     user_otp = generateKey()
     user = User.objects.get(email=validated_data['email'])
     user.otp = user_otp['OTP']
@@ -51,6 +54,7 @@ class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, min_length=3)
     password = serializers.CharField(max_length=68, min_length=5, write_only=True)
     username = serializers.CharField(max_length=255, min_length=3, read_only=True)
+    full_name = serializers.CharField(max_length=255, min_length=3, read_only=True)
     tokens = serializers.SerializerMethodField()
 
     def get_tokens(self, obj):
@@ -63,7 +67,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'username', 'tokens']
+        fields = ['email', 'password', 'username', 'full_name', 'tokens']
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -81,9 +85,14 @@ class LoginSerializer(serializers.ModelSerializer):
         if not user.is_verified:
             raise AuthenticationFailed('Email is not verified')
 
+        fullname = ""
+        if user.first_name and user.last_name:
+            fullname = user.full_name
+        
         return {
             'email': user.email,
             'username': user.username,
+            'full_name': fullname,
             'tokens': user.tokens
         }
 
@@ -142,7 +151,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
             email = attrs.get('email')
             if User.objects.filter(email=email).exists:
                 user = User.objects.get(email=email)
-                user.set_password(password)
+                user.password = make_password(password)
                 user.save()
                 PasswordResetSuccessEmail(email)
                 return user
@@ -151,4 +160,29 @@ class SetNewPasswordSerializer(serializers.Serializer):
         except Exception as e:
             raise AuthenticationFailed('Something went wrong!!!', 401)
         return super().validate(attrs)
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        exclude = ['user', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        first_name = attrs.get('first_name')
+        last_name = attrs.get('last_name')
+        email = attrs.get('email')
+
+        if User.objects.filter(username=username).exists():
+            raise AuthenticationFailed('The username already exists', 401)
+        else:
+            if User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
+                user.username = username
+                user.first_name = first_name
+                user.last_name = last_name
+                user.save()
+                return super().validate(attrs)
+            else:
+                raise ValidationError('Email Provided Does Not Match Signup Mail', 401)
+        
 
