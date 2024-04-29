@@ -8,6 +8,8 @@ AUTH_PROVIDERS = {'apple': 'apple', 'google': 'google', 'email': 'email'}
 class User(AbstractBaseUser, PermissionsMixin):
   email = models.EmailField(unique=True, max_length=100)
   username = models.CharField(null=True, blank=True, max_length=100)
+  first_name = models.CharField(null=True, blank=True, max_length=100)
+  last_name = models.CharField(null=True, blank=True, max_length=100)
   last_login = models.DateTimeField(null=True, blank=True)
   date_joined = models.DateTimeField(auto_now_add=True)
   auth_provider = models.CharField(max_length=255, blank=False, null=False, default=AUTH_PROVIDERS.get('email'))
@@ -26,9 +28,9 @@ class User(AbstractBaseUser, PermissionsMixin):
   
   objects = CustomManager()
   
-  # @property
-  # def full_name(self) -> str:
-  #   return self.first_name + "" + self.last_name
+  @property
+  def full_name(self) -> str:
+    return f"{self.first_name} {self.last_name}"
   
   def has_perm(self, perm, obj=None):
     return True

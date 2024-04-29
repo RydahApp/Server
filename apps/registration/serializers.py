@@ -54,6 +54,7 @@ class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, min_length=3)
     password = serializers.CharField(max_length=68, min_length=5, write_only=True)
     username = serializers.CharField(max_length=255, min_length=3, read_only=True)
+    full_name = serializers.CharField(max_length=255, min_length=3, read_only=True)
     tokens = serializers.SerializerMethodField()
 
     def get_tokens(self, obj):
@@ -66,7 +67,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'username', 'tokens']
+        fields = ['email', 'password', 'username', 'full_name', 'tokens']
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -84,9 +85,14 @@ class LoginSerializer(serializers.ModelSerializer):
         if not user.is_verified:
             raise AuthenticationFailed('Email is not verified')
 
+        fullname = ""
+        if user.first_name and user.last_name:
+            fullname = user.full_name
+        
         return {
             'email': user.email,
             'username': user.username,
+            'full_name': fullname,
             'tokens': user.tokens
         }
 
@@ -162,7 +168,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         username = attrs.get('username')
-        print(username)
+        first_name = attrs.get('first_name')
+        last_name = attrs.get('last_name')
         email = attrs.get('email')
 
         if User.objects.filter(username=username).exists():
@@ -171,6 +178,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             if User.objects.filter(email=email).exists():
                 user = User.objects.get(email=email)
                 user.username = username
+                user.first_name = first_name
+                user.last_name = last_name
                 user.save()
                 return super().validate(attrs)
             else:
