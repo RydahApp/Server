@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'apps.auths',
     'apps.socialAuths',
+    'colorfield',
+    'apps.product',
 ]
 
 AUTH_USER_MODEL = 'auths.User'
@@ -156,3 +158,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATIC_ROOT = 'staticfiles'
