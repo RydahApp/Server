@@ -44,7 +44,7 @@ def register_google_user(provider, user_id, email, name):
     else:
         user = {
             'email': email,
-            'password': os.environ.get('SOCIAL_SECRET')
+            'password': os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET')
             }
         user = User.objects.create_user(**user)
         user.username = generate_username(name)
@@ -64,7 +64,7 @@ def login_google_user(provider, user_id, email, name):
     if filtered_user_by_email.exists():
         if provider == filtered_user_by_email[0].auth_provider:
             registered_user = authenticate(
-                email=email, password=os.environ.get('SOCIAL_SECRET'))
+                email=email, password=os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET'))
             return {
                 'status': "login successful",
                 'username': registered_user.username,
