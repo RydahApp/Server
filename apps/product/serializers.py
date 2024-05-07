@@ -1,33 +1,42 @@
 from rest_framework import serializers
-from .models import ProductModel
-from rest_framework.exceptions import PermissionDenied
+from .models import ProductModel, Category, SizeVariant
 from rest_framework import status
 from rest_framework.response import Response
+    
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
 
-class ProductModelSerializer(serializers.ModelSerializer):
+class SizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SizeVariant
+        fields = '__all__'
+
+
+class ViewProductModelSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+    size = SizeSerializer()
+    
     class Meta:
         model = ProductModel
         fields = '__all__'
+        
     
-    def get(self, request, format=None):
-        product = ProductModel.objects.all()
-
-        return Response(
-            {"data": self.serializer_class(product, many=True).data}, 
-            status=status.HTTP_200_OK
-            )
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(
-            serializer.data, 
-            status=status.HTTP_201_CREATED
-            )
+    def create(self, validated_data):
+        category_data = validated_data.pop('category')
+        category_instance = Category.objects.create(**category_data)
+        product_instance = ProductModel.objects.create(category=category_instance, **validated_data)
+        size_data = validated_data.pop('size')
+        size_instance = SizeVariant.objects.create(**size_data)
+        size_product_instance = ProductModel.objects.create(size=size_instance, **validated_data)
+        return product_instance, size_product_instance
     
+  
+
+class CreateProductModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductModel
+        fields = '__all__'
    
-    
 
-   
