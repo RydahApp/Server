@@ -29,6 +29,7 @@ pip-delete-this-directory.txt
 *.log
 
 # Environments 
+*.env
 .env 
 .venv 
 env/ 
@@ -63,3 +64,14 @@ cover/
 
 # pyenv
 .python-version
+
+staticfiles/
+mediafiles/
+images/
+venv/
+env/
+venv*
+.vscode/
+migrations/
+
+*.pyc
