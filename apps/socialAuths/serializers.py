@@ -33,8 +33,11 @@ def generate_username(name):
     if not User.objects.filter(username=username).exists():
         return username
     else:
-        random_username = username + str(random.randint(0, 1000))
-        return generate_username(random_username)
+        random_suffix = str(random.randint(0, 1000))
+        new_username = username + str(random_suffix)
+        return new_username
+        # random_username = username + str(random.randint(0, 1000))
+        # return generate_username(random_username)
 
 
 def register_google_user(provider, user_id, email, name):
@@ -88,7 +91,6 @@ class GoogleSignupSocialAuthSerializer(serializers.Serializer):
         
         # if user_data['aud'] != os.environ.get('GOOGLE_CLIENT_ID'):
         #     raise AuthenticationFailed('Not Authorizied...')
-        print(user_data)
         user_id = user_data['sub']
         email = user_data['email']
         name = user_data['name']
