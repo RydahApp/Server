@@ -1,61 +1,49 @@
 from django.db import models
 from colorfield.fields import ColorField
 from django.utils.text import slugify
-
-CLOTHING_CHOICES = {
-    "Ab": "Abaya",
-    "Ji": "Jilbaab",
-    "Niq": "Niqab",
-    "Hi": "Hijaab",
-    "Dr": "Dress",
-}
-
-CLOTHING_SIZES = {
-    "SM": "SMALL",
-    "MED": "MEDIUM",
-    "LRG": "LARGE",
-}
+from apps.auths.models import User
 
 class Category(models.Model):
-  category_name = models.CharField(max_length=20, choices=CLOTHING_CHOICES, default=None)
+  name = models.CharField(max_length=150)
   slug = models.SlugField(max_length=200, blank=True)
+  created_at = models.DateTimeField(auto_now_add=True)
   
   def __str__(self):
-    return self.category_name
+    return self.name
   
   def save(self, *args, **kwargs):
-    self.slug = slugify(self.category_name)
+    self.slug = slugify(self.name)
     super(Category, self).save(*args, **kwargs)
-
-class SizeVariant(models.Model):
-  size_name = models.CharField(max_length=100, choices=CLOTHING_SIZES, default=None)
-  
-  def __str__(self) -> str:
-    return self.size_name
   
 
 class ProductModel(models.Model):
+  seller = models.ForeignKey(User, on_delete=models.CASCADE)
   category = models.ForeignKey(Category, on_delete=models.CASCADE)
-  product_name = models.CharField(max_length=100)
-  description = models.CharField(max_length=1000)
+  name = models.CharField(max_length=100)
+  description = models.TextField(max_length=1500)
   price = models.PositiveIntegerField(default=0)
   color = ColorField(default='#FF0000')
+  brand = models.CharField(max_length=100, null=True, blank=True)
+  size = models.CharField(max_length=100)
+  condition = models.CharField(max_length=100)
+  available_qty = models.PositiveBigIntegerField(default=0)
+  by_protect_fee = models.BooleanField(default=False)
+  approve = models.BooleanField(default=True)
   created_at = models.DateTimeField(auto_now_add=True)
   updated = models.DateTimeField(auto_now=True)
-  brand = models.CharField(max_length=100)
-  images = models.ImageField(upload_to = 'images/')
-  in_stock = models.BooleanField(default=True)
-  by_protect_fee = models.BooleanField(default=False)
-  
-  size = models.ForeignKey(SizeVariant, blank=True, null=True, on_delete=models.PROTECT)
 
   def __str__(self):
-    return self.product_name
+    return self.name
 
 
 class ProductImage(models.Model):
-    product = models.ForeignKey(ProductModel , on_delete=models.PROTECT)
-    image = models.ImageField(upload_to = 'images/') 
+  seller = models.ForeignKey(User, on_delete=models.CASCADE)
+  product = models.ForeignKey(ProductModel, on_delete=models.CASCADE, related_name='images')
+  image = models.ImageField(upload_to = 'product_images/') 
+  created_at = models.DateTimeField(auto_now_add=True)
+
+  def __str__(self):
+    return f'{self.seller.email} - {self.product.name}'
 
 
 

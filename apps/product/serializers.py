@@ -1,22 +1,26 @@
 from rest_framework import serializers
-from .models import ProductModel, Category, SizeVariant
+from .models import *
 from rest_framework import status
 from rest_framework.response import Response
     
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name']
 
-class SizeSerializer(serializers.ModelSerializer):
+class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SizeVariant
-        fields = '__all__'
+        model = ProductImage
+        fields = ['image']
 
+class ProductModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductModel
+        exclude = ['created_at', 'updated', 'seller', 'approve']
+        read_only_fields = ['by_protect_fee', 'available_qty']
 
 class ViewProductModelSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
-    size = SizeSerializer()
     
     class Meta:
         model = ProductModel
@@ -27,9 +31,7 @@ class ViewProductModelSerializer(serializers.ModelSerializer):
         category_data = validated_data.pop('category')
         category_instance = Category.objects.create(**category_data)
         product_instance = ProductModel.objects.create(category=category_instance, **validated_data)
-        size_data = validated_data.pop('size')
-        size_instance = SizeVariant.objects.create(**size_data)
-        size_product_instance = ProductModel.objects.create(size=size_instance, **validated_data)
+        size_product_instance = ProductModel.objects.create(**validated_data)
         return product_instance, size_product_instance
     
   
