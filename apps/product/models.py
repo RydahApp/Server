@@ -27,6 +27,7 @@ class ProductModel(models.Model):
   size = models.CharField(max_length=100)
   condition = models.CharField(max_length=100)
   available_qty = models.PositiveBigIntegerField(default=0)
+  protection_fee = models.PositiveIntegerField(default=0, null=True, blank=True)
   by_protect_fee = models.BooleanField(default=False)
   approve = models.BooleanField(default=True)
   created_at = models.DateTimeField(auto_now_add=True)
