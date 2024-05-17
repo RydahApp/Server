@@ -22,3 +22,8 @@ class ListProductsSerializer(serializers.ModelSerializer):
         model = ProductModel
         exclude = ['created_at', 'updated', 'seller', 'approve']
         read_only_fields = ['by_protect_fee', 'available_qty']
+
+class FavouriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFavouriteProducts
+        exclude = ['created_at', 'user']

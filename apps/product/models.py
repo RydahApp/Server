@@ -46,6 +46,15 @@ class ProductImage(models.Model):
   def __str__(self):
     return f'{self.seller.email} - {self.product.name}'
 
+class UserFavouriteProducts(models.Model):
+  user = models.ForeignKey(User, on_delete=models.CASCADE)
+  product = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
+  created_at = models.DateTimeField(auto_now_add=True)
 
+  class Meta:
+      verbose_name = ("UserFavouriteProducts")
+      verbose_name_plural = ("UserFavouriteProductss")
 
+  def __str__(self):
+      return f"{self.user.email} - {self.product.name}"
 
