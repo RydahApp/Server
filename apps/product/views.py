@@ -52,7 +52,7 @@ class ProductModelAPIView(ListCreateAPIView):
 
 
 class ProductSearchAPIView(ListAPIView):
-    search_fields = ['name', 'brand', 'description']
+    search_fields = ['name', 'brand', 'description', 'category__name']
     filter_backends = (filters.SearchFilter,)
     queryset = ProductModel.objects.filter(approve=True).order_by('-created_at')
     serializer_class = ListProductsSerializer
