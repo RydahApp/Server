@@ -4,8 +4,8 @@ from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import ProductModel
-from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
+from rest_framework import filters
 
    
 class CategoryAPIView(ListAPIView):
@@ -49,3 +49,11 @@ class ProductModelAPIView(ListCreateAPIView):
     
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
+
+
+class ProductSearchAPIView(ListAPIView):
+    search_fields = ['name', 'brand', 'description']
+    filter_backends = (filters.SearchFilter,)
+    queryset = ProductModel.objects.filter(approve=True).order_by('-created_at')
+    serializer_class = ListProductsSerializer
+    permission_classes = [IsAuthenticated]
