@@ -57,3 +57,11 @@ class ProductSearchAPIView(ListAPIView):
     queryset = ProductModel.objects.filter(approve=True).order_by('-created_at')
     serializer_class = ListProductsSerializer
     permission_classes = [IsAuthenticated]
+
+class UserFavouriteProductsAPIView(ListAPIView):
+    serializer_class = FavouriteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        product = UserFavouriteProducts.objects.filter(user = self.request.user)
+        return product
