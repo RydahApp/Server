@@ -17,3 +17,8 @@ class ProductModelSerializer(serializers.ModelSerializer):
         exclude = ['created_at', 'updated', 'seller', 'approve']
         read_only_fields = ['by_protect_fee', 'available_qty']
 
+class ListProductsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductModel
+        exclude = ['created_at', 'updated', 'seller', 'approve']
+        read_only_fields = ['by_protect_fee', 'available_qty']
