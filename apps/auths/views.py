@@ -1,5 +1,5 @@
 from rest_framework import generics, status, permissions, views
-from .models import User
+from .models import CustomUser
 from .serializers import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -14,7 +14,7 @@ class HomeView(generics.GenericAPIView):
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
     permission_classes = [AllowAny]
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -30,7 +30,7 @@ class VerifyEmail(views.APIView):
     def get(self, request):
         otp = request.GET.get('otp')
         try:
-            user = User.objects.get(otp=otp)
+            user = CustomUser.objects.get(otp=otp)
             verify = verify_otp(user.activation_key,otp)
             if verify:
                 user.is_verified = True
@@ -51,7 +51,7 @@ class ResendOTP(views.APIView):
     def get(self, request):
         email = request.GET.get("email")
         try:
-            user = User.objects.get(email = email)
+            user = CustomUser.objects.get(email = email)
             key = generateKey()
             user.otp = key['OTP']
             user.activation_key = key['totp']

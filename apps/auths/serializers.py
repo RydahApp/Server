@@ -13,7 +13,7 @@ from django.contrib.auth.hashers import make_password
 class RegisterSerializer(serializers.ModelSerializer):
   password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
   class Meta:
-    model = User
+    model = CustomUser
     fields = ['email', 'password']
     
   def validate_date_of_birth(self, date_of_birth):
@@ -25,11 +25,11 @@ class RegisterSerializer(serializers.ModelSerializer):
           return date_of_birth
       
   def create(self, validated_data):
-    user = User.objects.create(email = validated_data['email'])
+    user = CustomUser.objects.create(email = validated_data['email'])
     user.password = make_password(validated_data['password'])
     user.save()
     user_otp = generateKey()
-    user = User.objects.get(email=validated_data['email'])
+    user = CustomUser.objects.get(email=validated_data['email'])
     user.otp = user_otp['OTP']
     user.activation_key = user_otp['totp']
     user.save()
@@ -58,7 +58,7 @@ class LoginSerializer(serializers.ModelSerializer):
     tokens = serializers.SerializerMethodField()
 
     def get_tokens(self, obj):
-        user = User.objects.get(email=obj['email'])
+        user = CustomUser.objects.get(email=obj['email'])
 
         return {
             'refresh': user.tokens()['refresh'],
@@ -66,13 +66,13 @@ class LoginSerializer(serializers.ModelSerializer):
         }
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['email', 'password', 'username', 'full_name', 'tokens']
 
     def validate(self, attrs):
         email = attrs.get('email', '')
         password = attrs.get('password', '')
-        filtered_user_by_email = User.objects.filter(email=email)
+        filtered_user_by_email = CustomUser.objects.filter(email=email)
         user = auth.authenticate(email=email, password=password)
 
         if filtered_user_by_email.exists() and filtered_user_by_email[0].auth_provider != 'email':
@@ -101,14 +101,14 @@ class LoginSerializer(serializers.ModelSerializer):
 class EmailOTPVerificationSerializer(serializers.ModelSerializer):
     otp = serializers.IntegerField()
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['otp']
 
 class EmailResendOTPVerificationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['email']
 
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):
@@ -119,8 +119,8 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
     def validate(self, attrs):
         try:
             email = attrs.get('email')
-            if User.objects.filter(email=email).exists():
-                user = User.objects.get(email=email)
+            if CustomUser.objects.filter(email=email).exists():
+                user = CustomUser.objects.get(email=email)
                 user_otp = generateKey()
                 user.otp = user_otp['OTP']
                 user.activation_key = user_otp['totp']
@@ -135,22 +135,22 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
 class ResetPasswordEmailOTPVerificationSerializer(serializers.ModelSerializer):
     otp = serializers.IntegerField()
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['otp']
 
 class SetNewPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=6, max_length=68, write_only=True)
     email = serializers.EmailField(min_length=2)
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['password', 'email']
 
     def validate(self, attrs):
         try:
             password = attrs.get('password')
             email = attrs.get('email')
-            if User.objects.filter(email=email).exists:
-                user = User.objects.get(email=email)
+            if CustomUser.objects.filter(email=email).exists:
+                user = CustomUser.objects.get(email=email)
                 user.password = make_password(password)
                 user.save()
                 PasswordResetSuccessEmail(email)
@@ -172,11 +172,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         last_name = attrs.get('last_name')
         email = attrs.get('email')
 
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             raise AuthenticationFailed('The username already exists', 401)
         else:
-            if User.objects.filter(email=email).exists():
-                user = User.objects.get(email=email)
+            if CustomUser.objects.filter(email=email).exists():
+                user = CustomUser.objects.get(email=email)
                 user.username = username
                 user.first_name = first_name
                 user.last_name = last_name

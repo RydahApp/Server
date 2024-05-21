@@ -1,7 +1,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from apps.auths.models import User
+from apps.auths.models import CustomUser
 import random
 from rest_framework.exceptions import AuthenticationFailed
 from google.auth.transport import requests
@@ -30,7 +30,7 @@ class Google:
 
 def generate_username(name):
     username = "".join(name.split(' ')).lower()
-    if not User.objects.filter(username=username).exists():
+    if not CustomUser.objects.filter(username=username).exists():
         return username
     else:
         random_suffix = str(random.randint(0, 1000))
@@ -41,7 +41,7 @@ def generate_username(name):
 
 
 def register_google_user(provider, user_id, email, name):
-    filtered_user_by_email = User.objects.filter(email=email)
+    filtered_user_by_email = CustomUser.objects.filter(email=email)
     if filtered_user_by_email.exists():
         raise AuthenticationFailed(detail="User already registered... Proceed to login.")
     else:
@@ -49,12 +49,11 @@ def register_google_user(provider, user_id, email, name):
             'email': email,
             'password': os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET')
             }
-        user = User.objects.create_user(**user)
+        user = CustomUser.objects.create_user(**user)
         user.username = generate_username(name)
         user.is_verified = True
         user.auth_provider = provider
         user.save()
-
         return {
             'status': "signup successful",
             'name': user.username,
@@ -63,11 +62,19 @@ def register_google_user(provider, user_id, email, name):
 
 
 def login_google_user(provider, user_id, email, name):
-    filtered_user_by_email = User.objects.filter(email=email)
+    filtered_user_by_email = CustomUser.objects.filter(email=email)
+    print("not working")
     if filtered_user_by_email.exists():
+        print("HRYYYY")
+        print(filtered_user_by_email)
+        print(filtered_user_by_email.exists())
+
         if provider == filtered_user_by_email[0].auth_provider:
+            print("666", provider)
+            print(filtered_user_by_email[0].auth_provider)
             registered_user = authenticate(
                 email=email, password=os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET'))
+            print("45", registered_user)
             return {
                 'status': "login successful",
                 'username': registered_user.username,
@@ -76,6 +83,7 @@ def login_google_user(provider, user_id, email, name):
         else:
             raise AuthenticationFailed(
                 detail='Please continue your login using ' + filtered_user_by_email[0].auth_provider)
+               
 
     else:
         raise AuthenticationFailed(detail="User Not Found... Kindly Proceed To Signup.")

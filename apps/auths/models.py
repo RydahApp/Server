@@ -5,7 +5,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 AUTH_PROVIDERS = {'apple': 'apple', 'google': 'google', 'email': 'email'}
 
-class User(AbstractBaseUser, PermissionsMixin):
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+
+      
   email = models.EmailField(unique=True, max_length=100)
   username = models.CharField(null=True, blank=True, max_length=100)
   first_name = models.CharField(null=True, blank=True, max_length=100)
@@ -53,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         }
   
 class UserProfile(models.Model):
-  user = models.OneToOneField(User, on_delete=models.CASCADE)
+  user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
   first_name = models.CharField(max_length=150)
   last_name = models.CharField(max_length=150)
   username = models.CharField(max_length=150)
