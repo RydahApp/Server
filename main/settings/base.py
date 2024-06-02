@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'colorfield',
 ]
 
-AUTH_USER_MODEL = 'auths.CustomUser'
+AUTH_USER_MODEL = 'auths.User'
 
 
 MIDDLEWARE = [
