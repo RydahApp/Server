@@ -73,5 +73,5 @@ env/
 venv*
 .vscode/
 migrations/
-
+images/
 *.pyc
