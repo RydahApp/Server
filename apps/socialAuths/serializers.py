@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from apps.auths.models import User
@@ -33,8 +32,11 @@ def generate_username(name):
     if not User.objects.filter(username=username).exists():
         return username
     else:
-        random_username = username + str(random.randint(0, 1000))
-        return generate_username(random_username)
+        random_suffix = str(random.randint(0, 1000))
+        new_username = username + str(random_suffix)
+        return new_username
+        # random_username = username + str(random.randint(0, 1000))
+        # return generate_username(random_username)
 
 
 def register_google_user(provider, user_id, email, name):
@@ -51,7 +53,6 @@ def register_google_user(provider, user_id, email, name):
         user.is_verified = True
         user.auth_provider = provider
         user.save()
-
         return {
             'status': "signup successful",
             'name': user.username,
@@ -61,10 +62,18 @@ def register_google_user(provider, user_id, email, name):
 
 def login_google_user(provider, user_id, email, name):
     filtered_user_by_email = User.objects.filter(email=email)
+    print("not working")
     if filtered_user_by_email.exists():
+        print("HRYYYY")
+        print(filtered_user_by_email)
+        print(filtered_user_by_email.exists())
+
         if provider == filtered_user_by_email[0].auth_provider:
+            print("666", provider)
+            print(filtered_user_by_email[0].auth_provider)
             registered_user = authenticate(
                 email=email, password=os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET'))
+            print("45", registered_user)
             return {
                 'status': "login successful",
                 'username': registered_user.username,
@@ -73,6 +82,7 @@ def login_google_user(provider, user_id, email, name):
         else:
             raise AuthenticationFailed(
                 detail='Please continue your login using ' + filtered_user_by_email[0].auth_provider)
+               
 
     else:
         raise AuthenticationFailed(detail="User Not Found... Kindly Proceed To Signup.")
@@ -88,7 +98,6 @@ class GoogleSignupSocialAuthSerializer(serializers.Serializer):
         
         # if user_data['aud'] != os.environ.get('GOOGLE_CLIENT_ID'):
         #     raise AuthenticationFailed('Not Authorizied...')
-        print(user_data)
         user_id = user_data['sub']
         email = user_data['email']
         name = user_data['name']

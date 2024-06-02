@@ -59,7 +59,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
     def get_tokens(self, obj):
         user = User.objects.get(email=obj['email'])
-
+        print("1", user)
         return {
             'refresh': user.tokens()['refresh'],
             'access': user.tokens()['access']
@@ -74,28 +74,36 @@ class LoginSerializer(serializers.ModelSerializer):
         password = attrs.get('password', '')
         filtered_user_by_email = User.objects.filter(email=email)
         user = auth.authenticate(email=email, password=password)
+        print("Here", user)
+        
 
         if filtered_user_by_email.exists() and filtered_user_by_email[0].auth_provider != 'email':
+            print("Please continue your login using")
             raise AuthenticationFailed(detail='Please continue your login using ' + filtered_user_by_email[0].auth_provider)
 
         if not user:
+            print("Invalid credentials")
             raise AuthenticationFailed('Invalid credentials, try again')
         if not user.is_active:
+            print("not active")
             raise AuthenticationFailed('Account disabled, contact admin')
         if not user.is_verified:
+            print("not authentic")
             raise AuthenticationFailed('Email is not verified')
 
         fullname = ""
         if user.first_name and user.last_name:
             fullname = user.full_name
+            print("Fullname", fullname)
         
+        print("end", super().validate(attrs))
         return {
             'email': user.email,
             'username': user.username,
             'full_name': fullname,
             'tokens': user.tokens
         }
-
+            
         return super().validate(attrs)
     
 class EmailOTPVerificationSerializer(serializers.ModelSerializer):
@@ -103,6 +111,19 @@ class EmailOTPVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['otp']
+    
+    def validate(self, attrs):
+        # Print the received attributes
+        print("Received Attributes:", attrs)
+        
+        otp = attrs.get('otp', '')
+        
+        # Print the OTP being validated
+        print("Validating OTP:", otp)
+        
+        # Your validation logic here
+        
+        return attrs
 
 class EmailResendOTPVerificationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
@@ -110,6 +131,19 @@ class EmailResendOTPVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email']
+    
+    def validate(self, attrs):
+        # Print the received attributes
+        print("Received Attributes:", attrs)
+        
+        email = attrs.get('email', '')
+        
+        # Print the email being validated
+        print("Validating Email:", email)
+        
+        # Your validation logic here
+        
+        return attrs
 
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(min_length=2)

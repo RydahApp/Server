@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'apps.auths',
     'apps.socialAuths',
-    'colorfield',
     'apps.product',
+    'colorfield',
 ]
 
 AUTH_USER_MODEL = 'auths.User'

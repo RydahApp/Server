@@ -6,6 +6,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 AUTH_PROVIDERS = {'apple': 'apple', 'google': 'google', 'email': 'email'}
 
 class User(AbstractBaseUser, PermissionsMixin):
+  class Meta:
+        app_label = 'auths'
+        
   email = models.EmailField(unique=True, max_length=100)
   username = models.CharField(null=True, blank=True, max_length=100)
   first_name = models.CharField(null=True, blank=True, max_length=100)
