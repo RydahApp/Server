@@ -50,6 +50,13 @@ class ProductModelAPIView(ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
 
+class ProductModelDetailsAPIView(generics.GenericAPIView):
+    serializer_class = ProductModelSerializer
+    permission_classes = [IsAuthenticated]
+    def get(self, request, product_id):
+        product = ProductModel.objects.filter(id=product_id, approve=True)
+        serializer = ProductModelSerializer(product, many=True)
+        return Response(serializer.data)
 
 class ProductSearchAPIView(ListAPIView):
     search_fields = ['name', 'brand', 'description', 'category__name']
@@ -58,10 +65,17 @@ class ProductSearchAPIView(ListAPIView):
     serializer_class = ListProductsSerializer
     permission_classes = [IsAuthenticated]
 
-class UserFavouriteProductsAPIView(ListAPIView):
+class UserFavouriteProductsAPIView(ListCreateAPIView):
     serializer_class = FavouriteSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        product = UserFavouriteProducts.objects.filter(user = self.request.user)
+        product = UserFavouriteProducts.objects.filter(buyer = self.request.user)
         return product
+    
+    def perform_create(self, serializer):
+        serializer.save(buyer=self.request.user)
+    
+    
+    
+    

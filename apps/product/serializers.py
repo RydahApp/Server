@@ -26,4 +26,4 @@ class ListProductsSerializer(serializers.ModelSerializer):
 class FavouriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFavouriteProducts
-        exclude = ['created_at', 'user']
+        fields = ['product']
