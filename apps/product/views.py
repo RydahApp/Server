@@ -76,6 +76,24 @@ class UserFavouriteProductsAPIView(ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(buyer=self.request.user)
     
+
+class CustomerProductReviewAPIView(ListCreateAPIView):
+    serializer_class = CustomerProductReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        product = CustomerProductReview.objects.filter(product__seller = self.request.user)
+        return product
     
+    def perform_create(self, serializer):
+        serializer.save(buyer=self.request.user)
     
-    
+
+class ProductReviewAPIView(generics.GenericAPIView):
+    serializer_class = CustomerProductReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, product_id):
+        images = CustomerProductReview.objects.filter(product__id=product_id)
+        serializer = CustomerProductReviewSerializer(images, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -58,3 +58,17 @@ class UserFavouriteProducts(models.Model):
   def __str__(self):
       return f"{self.buyer.email} - {self.product.name}"
 
+
+class CustomerProductReview(models.Model):
+  buyer = models.ForeignKey(User, on_delete=models.CASCADE)
+  product = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
+  comment = models.CharField(max_length=5000)
+  rating = models.PositiveIntegerField(default=5)
+  created_at = models.DateTimeField(auto_now_add=True)
+
+  class Meta:
+      verbose_name = ("CustomerProductReview")
+      verbose_name_plural = ("CustomerProductReviews")
+
+  def __str__(self):
+      return f"{self.buyer.email} - {self.product.name} - {self.comment} - {self.rating}"

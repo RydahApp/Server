@@ -27,3 +27,10 @@ class FavouriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFavouriteProducts
         fields = ['product']
+
+
+class CustomerProductReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerProductReview
+        fields = ['product', 'comment', 'rating']
+        read_only_fields = ['created_at']
