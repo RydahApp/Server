@@ -32,5 +32,5 @@ class FavouriteSerializer(serializers.ModelSerializer):
 class CustomerProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerProductReview
-        fields = ['product', 'comment', 'rating']
-        read_only_fields = ['created_at']
+        fields = ['product', 'comment', 'rating', 'created_at', 'buyer']
+        read_only_fields = ['created_at', 'buyer']
