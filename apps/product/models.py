@@ -47,7 +47,7 @@ class ProductImage(models.Model):
     return f'{self.seller.email} - {self.product.name}'
 
 class UserFavouriteProducts(models.Model):
-  user = models.ForeignKey(User, on_delete=models.CASCADE)
+  buyer = models.ForeignKey(User, on_delete=models.CASCADE)
   product = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
   created_at = models.DateTimeField(auto_now_add=True)
 
@@ -56,5 +56,19 @@ class UserFavouriteProducts(models.Model):
       verbose_name_plural = ("UserFavouriteProductss")
 
   def __str__(self):
-      return f"{self.user.email} - {self.product.name}"
+      return f"{self.buyer.email} - {self.product.name}"
 
+
+class CustomerProductReview(models.Model):
+  buyer = models.ForeignKey(User, on_delete=models.CASCADE)
+  product = models.ForeignKey(ProductModel, on_delete=models.CASCADE)
+  comment = models.CharField(max_length=5000)
+  rating = models.PositiveIntegerField(default=5)
+  created_at = models.DateTimeField(auto_now_add=True)
+
+  class Meta:
+      verbose_name = ("CustomerProductReview")
+      verbose_name_plural = ("CustomerProductReviews")
+
+  def __str__(self):
+      return f"{self.buyer.email} - {self.product.name} - {self.comment} - {self.rating}"

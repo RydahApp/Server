@@ -26,4 +26,11 @@ class ListProductsSerializer(serializers.ModelSerializer):
 class FavouriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFavouriteProducts
-        exclude = ['created_at', 'user']
+        fields = ['product']
+
+
+class CustomerProductReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerProductReview
+        fields = ['product', 'comment', 'rating', 'created_at', 'buyer']
+        read_only_fields = ['created_at', 'buyer']
