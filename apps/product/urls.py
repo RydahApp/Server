@@ -10,6 +10,12 @@ urlpatterns = [
     path("product/favourite/", UserFavouriteProductsAPIView.as_view()),
     path("product/review/", CustomerProductReviewAPIView.as_view()),
     path('product/review/<int:product_id>/',  ProductReviewAPIView.as_view()),
+    path("buyer/address/", DeliveryAddressAPIView.as_view()),
+    path('buyer/address/<int:user_id>/',  BuyerDeliveryAddressAPIView.as_view()),
+    # path("buyer/address/<int:pk>/", BuyDeliveryAddressAPIView.as_view()),
+
+
+    
     # path('create-product/', ProductCreateView.as_view()),
 
     

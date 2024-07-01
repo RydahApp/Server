@@ -97,3 +97,30 @@ class ProductReviewAPIView(generics.GenericAPIView):
         images = CustomerProductReview.objects.filter(product__id=product_id)
         serializer = CustomerProductReviewSerializer(images, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+class DeliveryAddressAPIView(ListCreateAPIView):
+    serializer_class = DeliveryAddressSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        address = DeliveryAddress.objects.filter(buyer = self.request.user)
+        return address
+    
+    def perform_create(self, serializer):
+        serializer.save(buyer=self.request.user)
+
+class BuyerDeliveryAddressAPIView(generics.GenericAPIView):
+    serializer_class = DeliveryAddressSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        images = DeliveryAddress.objects.filter(buyer__id=user_id)
+        serializer = DeliveryAddressSerializer(images, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+# class BuyDeliveryAddressAPIView(generics.RetrieveUpdateDestroyAPIView):
+#     serializer_class = DeliveryAddressSerializer
+#     permission_classes = [IsAuthenticated]
+#     def get_queryset(self):
+#         return DeliveryAddress.objects.filter(id=self.kwargs["pk"], buyer=self.request.user)

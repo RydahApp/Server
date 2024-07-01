@@ -34,3 +34,9 @@ class CustomerProductReviewSerializer(serializers.ModelSerializer):
         model = CustomerProductReview
         fields = ['product', 'comment', 'rating', 'created_at', 'buyer']
         read_only_fields = ['created_at', 'buyer']
+
+class DeliveryAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryAddress
+        fields = ['full_address', 'created_at', 'buyer', 'id']
+        read_only_fields = ['id','created_at', 'buyer']

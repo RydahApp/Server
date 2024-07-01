@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from rest_framework.routers import DefaultRouter
 
 app_name = "apps.auths"
 
@@ -16,3 +17,8 @@ urlpatterns = [
     path('reset-set-new-password/', SetResetPasswordAPIView.as_view(), name="reset-set-new-pass"),
     path('create-userprofile/', UserProfileAPIView.as_view(), name="userprofile"),
 ]
+
+
+router = DefaultRouter()
+router.register(r"user", UserViewSet, basename="user"),
+urlpatterns += router.urls
