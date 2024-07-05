@@ -124,3 +124,26 @@ class BuyerDeliveryAddressAPIView(generics.GenericAPIView):
 #     permission_classes = [IsAuthenticated]
 #     def get_queryset(self):
 #         return DeliveryAddress.objects.filter(id=self.kwargs["pk"], buyer=self.request.user)
+
+class MessageListCreateView(generics.ListCreateAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Message.objects.filter(sender=user) | Message.objects.filter(receiver=user)
+
+    def create(self, request, *args, **kwargs):
+        serializer = CreateMessageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(sender=request.user)
+        return Response(serializer.data)
+
+class MessageDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Message.objects.filter(sender=user) | Message.objects.filter(receiver=user)

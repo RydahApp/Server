@@ -40,3 +40,13 @@ class DeliveryAddressSerializer(serializers.ModelSerializer):
         model = DeliveryAddress
         fields = ['full_address', 'created_at', 'buyer', 'id']
         read_only_fields = ['id','created_at', 'buyer']
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'sender', 'receiver', 'content', 'timestamp', 'is_read']
+
+class CreateMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['receiver', 'content']
