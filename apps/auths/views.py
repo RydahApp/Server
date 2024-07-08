@@ -7,10 +7,22 @@ from .otp import generateKey, verify_otp
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .utils import *
+from django.contrib.auth import get_user_model
+from rest_framework import viewsets
+
 # Create your views here.
 
 class HomeView(generics.GenericAPIView):
   permission_classes = [IsAuthenticated]
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    UserModel View.
+    """
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = RegisterSerializer
+    queryset = get_user_model().objects.all()
 
 class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer

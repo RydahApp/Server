@@ -72,3 +72,27 @@ class CustomerProductReview(models.Model):
 
   def __str__(self):
       return f"{self.buyer.email} - {self.product.name} - {self.comment} - {self.rating}"
+
+
+class DeliveryAddress(models.Model):
+  buyer = models.ForeignKey(User, on_delete=models.CASCADE)
+  full_address = models.TextField()
+  created_at = models.DateTimeField(auto_now_add=True)
+
+  class Meta:
+      verbose_name = ("DeliveryAddress")
+      verbose_name_plural = ("DeliveryAddresss")
+
+  def __str__(self):
+      return self.full_address
+
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Message from {self.sender} to {self.receiver} at {self.timestamp}'
