@@ -20,17 +20,19 @@ class RegisterSerializer(serializers.ModelSerializer):
       age = relativedelta(datetime.now(), date_of_birth).years
 
       if age < 18:
-          raise serializers.ValidationError('Must be at least 18 years old to register.')
+           raise serializers.ValidationError('Must be at least 18 years old to register.')
       else:
-          return date_of_birth
+           return date_of_birth
       
   def create(self, validated_data):
     user = User.objects.create(email = validated_data['email'])
     user.password = make_password(validated_data['password'])
     user.save()
     user_otp = generateKey()
+ 
     user = User.objects.get(email=validated_data['email'])
     user.otp = user_otp['OTP']
+
     user.activation_key = user_otp['totp']
     user.save()
     RegisterEmailMessage(user.email, user_otp['OTP'])
@@ -59,7 +61,6 @@ class LoginSerializer(serializers.ModelSerializer):
 
     def get_tokens(self, obj):
         user = User.objects.get(email=obj['email'])
-        print("1", user)
         return {
             'refresh': user.tokens()['refresh'],
             'access': user.tokens()['access']
@@ -74,29 +75,22 @@ class LoginSerializer(serializers.ModelSerializer):
         password = attrs.get('password', '')
         filtered_user_by_email = User.objects.filter(email=email)
         user = auth.authenticate(email=email, password=password)
-        print("Here", user)
         
 
         if filtered_user_by_email.exists() and filtered_user_by_email[0].auth_provider != 'email':
-            print("Please continue your login using")
             raise AuthenticationFailed(detail='Please continue your login using ' + filtered_user_by_email[0].auth_provider)
 
         if not user:
-            print("Invalid credentials")
             raise AuthenticationFailed('Invalid credentials, try again')
         if not user.is_active:
-            print("not active")
             raise AuthenticationFailed('Account disabled, contact admin')
         if not user.is_verified:
-            print("not authentic")
             raise AuthenticationFailed('Email is not verified')
 
         fullname = ""
         if user.first_name and user.last_name:
             fullname = user.full_name
-            print("Fullname", fullname)
         
-        print("end", super().validate(attrs))
         return {
             'email': user.email,
             'username': user.username,
@@ -113,13 +107,8 @@ class EmailOTPVerificationSerializer(serializers.ModelSerializer):
         fields = ['otp']
     
     def validate(self, attrs):
-        # Print the received attributes
-        print("Received Attributes:", attrs)
         
         otp = attrs.get('otp', '')
-        
-        # Print the OTP being validated
-        print("Validating OTP:", otp)
         
         # Your validation logic here
         
@@ -133,15 +122,7 @@ class EmailResendOTPVerificationSerializer(serializers.ModelSerializer):
         fields = ['email']
     
     def validate(self, attrs):
-        # Print the received attributes
-        print("Received Attributes:", attrs)
-        
         email = attrs.get('email', '')
-        
-        # Print the email being validated
-        print("Validating Email:", email)
-        
-        # Your validation logic here
         
         return attrs
 
@@ -155,6 +136,7 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
             email = attrs.get('email')
             if User.objects.filter(email=email).exists():
                 user = User.objects.get(email=email)
+
                 user_otp = generateKey()
                 user.otp = user_otp['OTP']
                 user.activation_key = user_otp['totp']
