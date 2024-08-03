@@ -16,10 +16,6 @@ This document provides information on how to access and explore the API endpoint
 
 To run the project on your local machine, follow these steps:
 
-## Cloning the Repository
-
-To access the source code and documentation, follow these steps:
-
 1. Open your terminal or command prompt. Navigate to the directory where you want to clone the repository. e.g cd or mkdir ..
 2. Setup Virtual enviroemnt e.g virtualenv .. && source ../bin/activate
 3. Use the following command to clone the repository: git clone https://github.com/RydahApp/Server.git
@@ -57,6 +53,19 @@ To access the source code and documentation, follow these steps:
     ```bash
     python manage.py runserver
     ```
+## How TO Test
+Running Tests with Coverage for the Entire Project
+- coverage run -m pytest
+
+specified file
+- coverage run -m pytest apps/auths/tests/test_serializers.py
+To see print staements coverage run -m pytest apps/auths/tests/test_serializers.py - s
+Coverage Reports
+- coverage report
+
+HTML Report
+- coverage html
+
 
 ## Resolving Database Conflict / Migration to Database
 
@@ -74,3 +83,4 @@ To access the source code and documentation, follow these steps:
     python manage.py runserver
     ```
 
+ 
