@@ -60,7 +60,7 @@ class UserProfile(models.Model):
   first_name = models.CharField(max_length=150)
   last_name = models.CharField(max_length=150)
   username = models.CharField(max_length=150)
-  mobile_no = models.CharField(max_length=16)
+  mobile_no = models.CharField(max_length=11)
   email = models.EmailField(max_length=150)
   location = models.CharField(max_length=700)
   created_at = models.DateTimeField(auto_now_add=True)

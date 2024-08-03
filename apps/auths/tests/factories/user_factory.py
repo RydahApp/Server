@@ -2,7 +2,6 @@ import factory
 from django.contrib.auth import get_user_model
 from apps.auths.models import UserProfile
 from django.db.models.signals import post_save
-# from apps.auths.tests.factories.user_factory import UserFactory
 from faker import Faker
 fake = Faker()
 
@@ -12,11 +11,11 @@ User = get_user_model()
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
-    
-    email = factory.Sequence(lambda n: f'test{n}@example.com')
-    username = factory.Sequence(lambda n: f'username{n}')
+        
     first_name = 'Test1'
     last_name = 'Last1'
+    email = factory.Sequence(lambda n: f'test{n}@example.com')
+    username = factory.Sequence(lambda n: f'username{n}')
     password = factory.PostGenerationMethodCall('set_password', 'defaultpassword')
     is_verified=True
     is_active=True
@@ -35,17 +34,14 @@ class UserProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = UserProfile
     
-    email = factory.LazyAttribute(lambda o: o.user.email)
     first_name = factory.LazyAttribute(lambda o: o.user.first_name)
     last_name = factory.LazyAttribute(lambda o: o.user.last_name)
-    username = factory.LazyAttribute(lambda o: o.user.username)
     email = factory.LazyAttribute(lambda o: o.user.email)
+    username = factory.LazyAttribute(lambda o: o.user.username)
     user = factory.SubFactory(UserFactory, profile=None)
-    
+    mobile_no = factory.Faker('numerify', text='###########')
+    location = factory.Faker('address')
 
-
- # mobile_no = factory.LazyFunction(lambda: fake.msisdn()[:16])    
-# location = factory.Faker('address')
     
 class AdminFactory(factory.django.DjangoModelFactory):
     class Meta:

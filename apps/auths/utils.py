@@ -3,7 +3,7 @@ from sendgrid.helpers.mail import Mail
 import os
 
 sg = SendGridAPIClient(api_key=os.environ.get('SENDGRID_KEY'))
-fr = ""
+fr = os.environ.get('SENDER_EMAIL')##changed
 def VerifyEmailMessage(to):
     message = Mail(
     from_email=fr,  # Sender's email address
